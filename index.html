@@ -2,9 +2,10 @@
 <!--
 ═══════════════════════════════════════════════════════════════════
   BAROG English · 학습 자료실
-  현재 버전: v3.6.1  (2026-07-21)
+  현재 버전: v3.6.2  (2026-08-03)
 ─────────────────────────────────────────────────────────────────
   변경 이력 (v3.x ~):
+  v3.6.2 — 밀린 단어 표시를 기존 1주일에서 2주일로 연장
   v3.6.1 — 단어장 시트에 예문/예문해석 컬럼이 있을 때 시험 보기에 예문이 섞여 나오던 버그 수정 (뜻 컬럼만 추출, 예문 컬럼은 영어 단어 감지로 제외).
   v3.6 — Daily Test 배너 정렬 일관성: 유형별(단어장/숙어장/모의고사/추가단어)로 완결되게 묶고 각 유형 안에서 오늘→밀림 순. banner-wrapper flex + getBannerOrder() 로 SLOTS 순서 기반 정렬.
   v3.5 — SLOTS 통합 리팩토링 3단계: 퀴즈 오버레이(.qz-*) 색상을 슬롯 기반으로 통합. mock/weak 하드코딩 CSS 클래스(.qz-card-line.mock, .qz-pill.weak-pill 등 10개) 완전 제거. startQuiz/startMockQuiz 에서 오버레이에 --fg-color 인라인 주입. HTML의 mock-name/mock-pill 클래스 정리.
@@ -839,7 +840,7 @@
                        → 푸터에는 '3 · 1'만 표시, 채우면 '3 · 1 · 2'처럼 표시
    ════════════════════════════════════════════════════════════ */
 const APP_VERSION      = '3 · 6';
-const APP_VERSION_DATE = '1';
+const APP_VERSION_DATE = '2';
 
 const STUDENT_NAME = '박주은';
 /* ════════════════════════════════════════════════════════════
@@ -1669,7 +1670,8 @@ async function loadWeakQuizBanners() {
   await weakDataReady;
   if (!weakWords.length) return;   // 시트에 단어가 없으면 종료
 
-  const targetDates = [todayStr(), daysAgo(1), daysAgo(2), daysAgo(3), daysAgo(4), daysAgo(5), daysAgo(6)];
+  // 오늘~13일 전, 2주치
+  const targetDates = Array.from({ length: 14 }, (_, i) => i === 0 ? todayStr() : daysAgo(i));
   let scheduleRows = [];
   try {
     const res = await fetch(SCHEDULE_CSV + '&t=' + Date.now());
@@ -1860,8 +1862,8 @@ async function loadQuizConfig() {
     await schoolDataReady;
   }
 
-  // 1. 스케줄 시트에서 7일치(오늘~6일 전) 학생 데이터 읽기
-  const targetDates = [todayStr(), daysAgo(1), daysAgo(2), daysAgo(3), daysAgo(4), daysAgo(5), daysAgo(6)]; // 최근순
+  // 1. 스케줄 시트에서 14일치(오늘~13일 전, 2주) 학생 데이터 읽기
+  const targetDates = Array.from({ length: 14 }, (_, i) => i === 0 ? todayStr() : daysAgo(i)); // 최근순
   let scheduleRows = [];
 
   try {
@@ -2443,7 +2445,8 @@ async function loadMockQuizBanners() {
     await weakDataReady;
   }
 
-  const targetDates = [todayStr(), daysAgo(1), daysAgo(2), daysAgo(3), daysAgo(4), daysAgo(5), daysAgo(6)];
+  // 오늘~13일 전, 2주치
+  const targetDates = Array.from({ length: 14 }, (_, i) => i === 0 ? todayStr() : daysAgo(i));
   let scheduleRows = [];
   try {
     const res = await fetch(SCHEDULE_CSV + '&t=' + Date.now());
